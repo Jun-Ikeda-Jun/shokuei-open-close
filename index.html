@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>食営オープンデータ台帳｜飲食店営業許可の公開データ一覧</title>
+<meta name="description" content="全国の保健所設置自治体が公開している「飲食店営業許可施設一覧」を、開業・廃業の把握に使えるかどうかの観点で1件ずつ調べた台帳です。">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  line-height:1.7;color:#1a1d21;background:#f6f7f9;-webkit-text-size-adjust:100%}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 64px}
+header{background:#12304a;color:#fff;padding:32px 0 28px;margin-bottom:24px}
+header .wrap{padding-bottom:0}
+h1{margin:0 0 8px;font-size:1.55rem;letter-spacing:.02em}
+.lead{margin:0;font-size:.95rem;opacity:.9}
+.purpose{margin:14px 0 0;padding:12px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:.88rem}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;list-style:none}
+.stats li{background:rgba(255,255,255,.14);border-radius:8px;padding:8px 12px;font-size:.82rem}
+.stats b{font-size:1.15rem;margin-right:3px}
+.controls{position:sticky;top:0;z-index:5;background:#f6f7f9;padding:14px 0 10px;margin-bottom:8px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid #dfe3e8}
+.controls input,.controls select{font:inherit;font-size:.9rem;padding:8px 10px;border:1px solid #c8ced6;
+  border-radius:8px;background:#fff;color:inherit}
+.controls input{flex:1;min-width:150px}
+.chip{font:inherit;font-size:.82rem;padding:7px 12px;border:1px solid #c8ced6;border-radius:999px;
+  background:#fff;color:#333;cursor:pointer}
+.chip[aria-pressed=true]{background:#12304a;color:#fff;border-color:#12304a}
+.hit{font-size:.82rem;color:#5b6672;width:100%}
+.region h2{font-size:1.05rem;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid #12304a}
+.region h2 .n{font-weight:400;font-size:.8rem;color:#5b6672;margin-left:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:#fff;border:1px solid #e2e6eb;border-radius:12px;padding:14px 16px}
+.gov{font-size:.82rem;color:#5b6672;margin-bottom:2px}
+.pref{display:inline-block;background:#eef2f6;color:#12304a;border-radius:4px;padding:1px 6px;margin-right:6px;font-weight:600}
+.card h3{margin:0 0 8px;font-size:1rem;line-height:1.45}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tag{font-size:.74rem;padding:2px 8px;border-radius:999px;background:#eef2f6;color:#41505f}
+.tag.t-ok{background:#e3f3e8;color:#1d6b38}
+.tag.t-full{background:#12304a;color:#fff}
+.tag.t-part{background:#2f6f9e;color:#fff}
+.tag.t-machine{background:#dbe6ef;color:#1d445f}
+.tag.t-manual{background:#f0e6d8;color:#7a5320}
+dl{margin:0 0 10px;font-size:.83rem}
+dl>div{display:flex;gap:8px;padding:3px 0;border-top:1px dotted #e6eaee}
+dt{flex:0 0 5.6em;color:#6b7684}
+dd{margin:0;flex:1;word-break:break-word}
+.src{display:inline-block;font-size:.85rem;color:#12304a;font-weight:600;text-decoration:none;
+  border-bottom:1px solid currentColor;padding-bottom:1px}
+.meta{margin-top:8px;font-size:.72rem;color:#94a0ac}
+.empty{padding:40px 0;text-align:center;color:#6b7684}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid #dfe3e8;font-size:.8rem;color:#5b6672}
+footer h3{font-size:.9rem;margin:16px 0 6px;color:#1a1d21}
+footer ul{margin:0;padding-left:1.2em}
+@media(max-width:600px){h1{font-size:1.25rem}.grid{grid-template-columns:1fr}}
+@media(prefers-color-scheme:dark){
+  body{background:#14181d;color:#e6eaef}
+  .controls{background:#14181d;border-bottom-color:#2a313a}
+  .controls input,.controls select,.chip{background:#1d232a;border-color:#38414c;color:#e6eaef}
+  .chip[aria-pressed=true]{background:#4b8fc4;border-color:#4b8fc4;color:#07121c}
+  .card{background:#1d232a;border-color:#2f3841}
+  .pref{background:#2b3542;color:#a9c9e4}
+  .tag{background:#2b3542;color:#b8c4d0}
+  .tag.t-full{background:#4b8fc4;color:#07121c}
+  .tag.t-part{background:#356d95;color:#eaf3fa}
+  .tag.t-machine{background:#2f4457;color:#bcd6ea}
+  .tag.t-ok{background:#24452f;color:#a5d9b6}
+  .tag.t-manual{background:#4a3c26;color:#e0c79b}
+  dl>div{border-top-color:#2a313a}
+  .region h2{border-bottom-color:#4b8fc4}
+  .src{color:#7cb6e0}
+  footer{border-top-color:#2a313a;color:#93a1b0}
+  footer h3{color:#e6eaef}
+}
+</style>
+<header><div class="wrap">
+  <h1>食営オープンデータ台帳</h1>
+  <p class="lead">全国の保健所設置自治体が公開している「飲食店営業許可施設一覧」を、開業・廃業の把握に使えるかどうかの観点で1件ずつ調べた台帳です。</p>
+  <p class="purpose">「10日後に開く店」＝許可年月日、「先週閉じた店」＝廃業/失効の記載。この2つが取れる自治体はどこか、を事実だけで整理する。</p>
+  <ul class="stats">
+    <li><b>11</b>データセット</li>
+    <li><b>11</b>自治体</li>
+    <li><b>7</b>都道府県</li>
+    <li><b>9</b>件が機械可読</li>
+    <li>許可年月日あり <b>1</b></li>
+    <li>廃業/失効あり <b>1</b></li>
+  </ul>
+</div></header>
+
+<div class="wrap">
+  <div class="controls">
+    <input id="q" type="search" placeholder="自治体名・データセット名で絞り込み" aria-label="キーワードで絞り込み">
+    <select id="pref" aria-label="都道府県で絞り込み"><option value="">すべての都道府県</option><option value="青森県">青森県</option><option value="千葉県">千葉県</option><option value="東京都">東京都</option><option value="神奈川県">神奈川県</option><option value="愛知県">愛知県</option><option value="大阪府">大阪府</option><option value="香川県">香川県</option></select>
+    <button class="chip" id="fMachine" aria-pressed="false">機械可読のみ</button>
+    <button class="chip" id="fPermit" aria-pressed="false">許可年月日ありのみ</button>
+    <p class="hit" id="hit"></p>
+  </div>
+  <section class="region"><h2>北海道・東北 <span class="n">1件</span></h2>
+<div class="grid"><article class="card" data-rank="machine" data-pref="青森県" data-search="青森県青森市食品営業許可施設一覧（オープンデータ）CSV">
+  <div class="gov"><span class="pref">青森県</span>青森市</div>
+  <h3>食品営業許可施設一覧（オープンデータ）</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span><span class="tag">更新: 月次</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>月次</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://www.city.aomori.aomori.jp/shisei/jouhokoukai/opendata/1006170/1006184.html" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article></div></section>
+<section class="region"><h2>関東 <span class="n">7件</span></h2>
+<div class="grid"><article class="card" data-rank="machine" data-pref="千葉県" data-search="千葉県船橋市食品営業施設一覧CSV">
+  <div class="gov"><span class="pref">千葉県</span>船橋市</div>
+  <h3>食品営業施設一覧</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>不明</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://data.bodik.jp/dataset/122041_shokuhineigyoukyokasisetu/resource/23b029a9-6c56-4869-8cea-9a9282d50900" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="machine" data-pref="東京都" data-search="東京都港区食品営業許可一覧CSV">
+  <div class="gov"><span class="pref">東京都</span>港区</div>
+  <h3>食品営業許可一覧</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span><span class="tag">更新: 月次</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>月次</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://search.ckan.jp/datasets/catalog.data.metro.tokyo.lg.jp__dataset:t131032d0000000244" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="part" data-pref="東京都" data-search="東京都台東区食品衛生営業施設一覧（業種順・許可日順）CSV">
+  <div class="gov"><span class="pref">東京都</span>台東区</div>
+  <h3>食品衛生営業施設一覧（業種順・許可日順）</h3>
+  <div class="tags"><span class="tag t-part">片方は追える</span><span class="tag">CSV</span><span class="tag t-ok">許可年月日あり</span><span class="tag">更新: 月次</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>あり</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>月次</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://search.ckan.jp/datasets/catalog.data.metro.tokyo.lg.jp__dataset:t131067d3100000006" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="manual" data-pref="東京都" data-search="東京都東京都食品関係営業台帳オープンデータ不明">
+  <div class="gov"><span class="pref">東京都</span>東京都</div>
+  <h3>食品関係営業台帳オープンデータ</h3>
+  <div class="tags"><span class="tag t-manual">目視・手作業が必要</span><span class="tag">不明</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>不明</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>不明</dd></div>
+    <div><dt>利用条件</dt><dd>不明</dd></div>
+  </dl>
+  <a class="src" href="https://www.hokeniryo.metro.tokyo.lg.jp/kenkou/hokenjo_daicho/eigyousya" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="machine" data-pref="神奈川県" data-search="神奈川県神奈川県新規飲食店営業許可施設一覧（月別）Excel">
+  <div class="gov"><span class="pref">神奈川県</span>神奈川県</div>
+  <h3>新規飲食店営業許可施設一覧（月別）</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">Excel</span><span class="tag">更新: 月次</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>Excel</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>なし</dd></div>
+    <div><dt>更新頻度</dt><dd>月次</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY</dd></div>
+  </dl>
+  <a class="src" href="https://catalog.opendata.pref.kanagawa.jp/dataset/7d06a2ad1602a6c3b090af5718505c0e" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="manual" data-pref="神奈川県" data-search="神奈川県川崎市食品営業許可施設に関する情報不明">
+  <div class="gov"><span class="pref">神奈川県</span>川崎市</div>
+  <h3>食品営業許可施設に関する情報</h3>
+  <div class="tags"><span class="tag t-manual">目視・手作業が必要</span><span class="tag">不明</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>不明</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>不明</dd></div>
+    <div><dt>利用条件</dt><dd>不明</dd></div>
+  </dl>
+  <a class="src" href="https://www.city.kawasaki.jp/kurashi/category/22-12-8-0-0-0-0-0-0-0.html" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article>
+<article class="card" data-rank="part" data-pref="神奈川県" data-search="神奈川県相模原市食品衛生関係施設一覧（食品衛生法：営業許可）Excel/PDF">
+  <div class="gov"><span class="pref">神奈川県</span>相模原市</div>
+  <h3>食品衛生関係施設一覧（食品衛生法：営業許可）</h3>
+  <div class="tags"><span class="tag t-part">片方は追える</span><span class="tag">Excel/PDF</span><span class="tag t-ok">廃業/失効あり</span><span class="tag">更新: 年次（年度末現在は年1回・翌年度4月）／月次（各月分は翌月）</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>Excel/PDF</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>あり</dd></div>
+    <div><dt>更新頻度</dt><dd>年次（年度末現在は年1回・翌年度4月）／月次（各月分は翌月）</dd></div>
+    <div><dt>利用条件</dt><dd>不明</dd></div>
+  </dl>
+  <a class="src" href="https://opendata.city.sagamihara.kanagawa.jp/dataset/eigyo_kyoka" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article></div></section>
+<section class="region"><h2>中部 <span class="n">1件</span></h2>
+<div class="grid"><article class="card" data-rank="machine" data-pref="愛知県" data-search="愛知県岡崎市食品等営業許可・届出一覧（232025_food_business_all.csv）CSV">
+  <div class="gov"><span class="pref">愛知県</span>岡崎市</div>
+  <h3>食品等営業許可・届出一覧（232025_food_business_all.csv）</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>不明</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://data.bodik.jp/dataset/232025_food_business_all/resource/a893c7d6-5c10-4fb4-b9fa-cb48edd81565" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article></div></section>
+<section class="region"><h2>近畿 <span class="n">1件</span></h2>
+<div class="grid"><article class="card" data-rank="machine" data-pref="大阪府" data-search="大阪府大阪市食品営業許可施設一覧（令和8年3月31日時点）CSV">
+  <div class="gov"><span class="pref">大阪府</span>大阪市</div>
+  <h3>食品営業許可施設一覧（令和8年3月31日時点）</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>不明</dd></div>
+    <div><dt>利用条件</dt><dd>CC BY 4.0</dd></div>
+  </dl>
+  <a class="src" href="https://www.city.osaka.lg.jp/kenko/page/0000575579.html" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article></div></section>
+<section class="region"><h2>中国・四国 <span class="n">1件</span></h2>
+<div class="grid"><article class="card" data-rank="machine" data-pref="香川県" data-search="香川県高松市食品等営業許可施設一覧CSV">
+  <div class="gov"><span class="pref">香川県</span>高松市</div>
+  <h3>食品等営業許可施設一覧</h3>
+  <div class="tags"><span class="tag t-machine">機械可読（日付要確認）</span><span class="tag">CSV</span><span class="tag">更新: 月次</span></div>
+  <dl>
+    <div><dt>形式</dt><dd>CSV</dd></div>
+    <div><dt>許可年月日</dt><dd>不明</dd></div>
+    <div><dt>廃業/失効</dt><dd>不明</dd></div>
+    <div><dt>更新頻度</dt><dd>月次</dd></div>
+    <div><dt>利用条件</dt><dd>クリエイティブ・コモンズ 表示</dd></div>
+  </dl>
+  <a class="src" href="https://opendata.smartcity-takamatsu.jp/ckan/dataset/licensed_food_business_facility_list/resource/a4466ee7-c0a8-434a-9b6e-2b76c337ecf3" target="_blank" rel="noopener noreferrer">出典（公開元ページ）→</a>
+  <div class="meta">確認日: 2026-07-27</div>
+</article></div></section>
+  <p class="empty" id="empty" hidden>条件に合うデータセットがありません。</p>
+
+  <footer>
+    <h3>このサイトについて</h3>
+    <p>各自治体が公開している「営業許可施設一覧」について、<strong>どこが・どんな形式で・どの項目を公開しているか</strong>という事実だけを収集し、出典リンクとともに掲載しています。施設ごとの名簿データ（店名・所在地など）そのものは掲載していません。</p>
+    <h3>掲載の方針</h3>
+    <ul>
+      <li>掲載するのは公開元が示している事実（データセット名・形式・項目の有無・更新頻度・利用条件・URL）のみです。</li>
+      <li>ページ本文の転載はしません。転載を禁じる旨の表示があるページは収集対象から除外しています。</li>
+      <li>「開業・廃業とも追える」等の区分は、収集した項目の有無から機械的に付けた整理であり、公開元による評価ではありません。</li>
+      <li>公開状況は変わります。実際の利用前に必ず出典リンク先の最新情報をご確認ください。誤りのある記載が含まれる可能性があります。</li>
+    </ul>
+    <h3>この一覧の使い道</h3>
+    <p>本サイトは無料の公開状況台帳（集客の入口）。有料商品は、許可年月日の取れる自治体を対象にした週次の新規許可/廃業リスト配信（1都道府県 月19,800円想定）を別途提供する前提。</p>
+    <p>最終更新: 2026-07-27</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var q=document.getElementById('q'), pref=document.getElementById('pref'),
+      fM=document.getElementById('fMachine'), fP=document.getElementById('fPermit'),
+      hit=document.getElementById('hit'), empty=document.getElementById('empty'),
+      cards=[].slice.call(document.querySelectorAll('.card'));
+  var MACHINE={full:1,part:1,machine:1};
+  function toggle(b){ b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true'); apply(); }
+  function apply(){
+    var kw=q.value.trim().toLowerCase(), p=pref.value,
+        onlyM=fM.getAttribute('aria-pressed')==='true',
+        onlyP=fP.getAttribute('aria-pressed')==='true', n=0;
+    cards.forEach(function(c){
+      var r=c.getAttribute('data-rank');
+      var ok = (!kw || c.getAttribute('data-search').toLowerCase().indexOf(kw)>=0)
+            && (!p  || c.getAttribute('data-pref')===p)
+            && (!onlyM || MACHINE[r])
+            && (!onlyP || r==='full' || r==='part');
+      c.hidden=!ok; if(ok) n++;
+    });
+    document.querySelectorAll('.region').forEach(function(s){
+      s.hidden = !s.querySelector('.card:not([hidden])');
+    });
+    hit.textContent = n + ' 件を表示中（全 ' + cards.length + ' 件）';
+    empty.hidden = n>0;
+  }
+  q.addEventListener('input',apply); pref.addEventListener('change',apply);
+  fM.addEventListener('click',function(){toggle(fM)}); fP.addEventListener('click',function(){toggle(fP)});
+  apply();
+})();
+</script>
+</html>
+<script data-goatcounter="https://junikeda.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
